@@ -1,4 +1,6 @@
+import os
 from pathlib import Path
+from datetime import timedelta
 import django
 from django.utils.translation import gettext
 django.utils.translation.ugettext = gettext
@@ -32,9 +34,10 @@ INSTALLED_APPS = [
     "accounts",
     "products",
     "sales",
-
-    # Local Apps
-    # 'users', 
+    "home",    
+    "userroles",
+    "role",
+    "categories"
 ]
 
 
@@ -51,22 +54,23 @@ MIDDLEWARE = [
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': [        
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        #  'django.contrib.auth.middleware.AuthenticationMiddleware'
     ],
 }
 
 GRAPHENE = {
-    'SCHEMA': 'accounts.schema.schema'
+    'SCHEMA': 'django_graphql.schema.schema'
 }
-
 
 ROOT_URLCONF = 'django_graphql.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -102,11 +106,11 @@ CORS_ALLOW_ALL_ORIGINS = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'django_graphql',  # Your database name
-        'USER': 'rey',          # Your MySQL username
-        'PASSWORD': 'rey',  # Your MySQL password
-        'HOST': '127.0.0.1',          # Or the IP address of your MySQL server
-        'PORT': '3306',               # The default MySQL port
+        'NAME': 'django_graphql',
+        'USER': 'rey',          
+        'PASSWORD': 'rey',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
 
@@ -120,6 +124,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+         'OPTIONS': {
+            'min_length': 3,
+          }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -129,7 +136,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTH_USER_MODEL = 'accounts.UserModel'
+AUTH_USER_MODEL = 'accounts.User'
 
 
 
@@ -150,3 +157,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
