@@ -11,9 +11,15 @@ export default function Home() {
     <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
     <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
     <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="3" aria-label="Slide 4"></button>
+    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="4" aria-label="Slide 5"></button>
   </div>
   <div className="carousel-inner">
     <div className="carousel-item active">
+      <img src="/images/6.png" className="d-block w-100" alt="..."/>
+      <div className="carousel-caption d-none d-md-block">
+      </div>
+    </div>
+    <div className="carousel-item">
       <img src="/images/4.png" className="d-block w-100" alt="..."/>
       <div className="carousel-caption d-none d-md-block">
       </div>

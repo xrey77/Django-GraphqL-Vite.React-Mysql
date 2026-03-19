@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from graphql import GraphQLError
 from accounts.graphql.types.userType import UserModelType 
+from graphql_jwt.shortcuts import get_token
 
 class LoginMutation(graphene.Mutation):
     class Arguments:
@@ -19,10 +20,10 @@ class LoginMutation(graphene.Mutation):
 
         if user is not None:
             if user.is_active:
-                token, created = Token.objects.get_or_create(user=user)
+                token = get_token(user) 
                 return LoginMutation(
                     user=user, 
-                    token=token.key, 
+                    token=token, 
                     message="You have logged-in successfully."
                 )
             else:

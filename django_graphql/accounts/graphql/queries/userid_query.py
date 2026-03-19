@@ -1,44 +1,43 @@
 import graphene
+from graphql_jwt.decorators import login_required
+from accounts.models import User
 from accounts.graphql.types.userType import UserModelType
 
-class UserIdQuery(graphene.ObjectType):
+class UserId(graphene.ObjectType):
+    user = graphene.Field(UserModelType, id=graphene.Int(required=True))
 
-    user = graphene.Field(UserModelType)
-
-def resolve_user(self, info):
-    user = info.context.user
-
-    if user.is_anonymous:
-        raise Exception("Authentication required")
-
-    if not user.is_active:
-        raise Exception("This account is inactive.")
-
-    return user
-
-# HEADERS   
-# {
-#   "Authorization": "Token 9829ccc2e887645f6d0a6c95a6f3d983edbb64a3"
-# }
-
+    @login_required
+    def resolve_user(self, info, id):
+        try:
+            return User.objects.get(pk=id)        
+        except User.DoesNotExist:
+            return None
 
 # ======GET USER BY ID===========
-# query GetUser($id: ID!) {
-#   getuserId(id: $id) {
-#     id
-#     firstName
-#     lastName
-#     email
-#     mobile
-#     username
-#     isActivated
-#     isBlocked
-#     userpicture
-#     qrcodeurl
+# query GetUserId($id: Int!) {
+#   getuserId {
+#     user(id: $id) {
+#       id
+#       firstName
+#       lastName
+#       email
+#       mobile
+#       username
+#       isActivated
+#       isBlocked
+#       userpicture
+#       qrcodeurl    
+#     }
+#     }
 #   }
-# }
+
 
 # ==========VARIABLES ============
 # {
 #   "id": "1"
+# }
+
+# HEADERS   
+# {
+#   "Authorization": "Token 9829ccc2e887645f6d0a6c95a6f3d983edbb64a3"
 # }

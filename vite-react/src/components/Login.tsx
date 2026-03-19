@@ -2,13 +2,9 @@ import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import Mfa from "./Mfa.tsx";
 import jQuery from "jquery";
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
-  headers: {'Accept': 'application/json',
-            'Content-Type': 'application/json'}
-})
+import { useMutation as useApolloMutation } from '@apollo/client/react';
+import { SIGNIN_MUTATION } from "../graphql/login_query.ts";
+import type { LoginUserData, LoginUserVariables } from "../graphql/login_query.ts";
 
 export default function Login() {
    const [username, setUsername] = useState<string>('');
@@ -17,46 +13,51 @@ export default function Login() {
    const [isdiabled, setIsdisabled] = useState(false);
    const navigate = useNavigate();
 
-   const submitLogin = async (event: any) => {
+  const [loginMutation ] = useApolloMutation<LoginUserData, LoginUserVariables>(SIGNIN_MUTATION, {
+      onCompleted: (data: any) => {
+        setMessage(data.loginMutation.message);
+        let userpic: string = `http://127.0.0.1:8000/static/users/${data.loginMutation.user.userpicture}`
+        if (data.loginMutation.user.qrcodeurl !== null) {
+          window.sessionStorage.setItem('USERID',data.loginMutation.user.id);
+          window.sessionStorage.setItem('TOKEN',data.loginMutation.token);
+          window.sessionStorage.setItem('USERPIC', userpic);
+          jQuery("#loginReset").trigger("click");
+          setIsdisabled(false);
+          jQuery("#mfaModal").trigger("click");
+        } else {
+          window.sessionStorage.setItem('USERID',data.loginMutation.user.id);
+          window.sessionStorage.setItem('USERNAME',data.loginMutation.user.username);
+          window.sessionStorage.setItem('TOKEN',data.loginMutation.token);                        
+          window.sessionStorage.setItem('USERPIC', userpic);
+          setIsdisabled(false);
+          jQuery("#loginReset").trigger('"click')
+          closeLogin;
+          navigate('/'); 
+          location.reload();
+        }
+        setTimeout(() => { setMessage(''); }, 3000);
+      },
+      onError: (err: any) => {
+        setMessage(err.message);      
+        setTimeout(() => { setMessage(''); setIsdisabled(false); }, 3000);
+      }
+  });
+
+   const submitLogin = async (event: React.SubmitEvent) => {
     event.preventDefault();
     setMessage('please wait...');
     setIsdisabled(true);
-    const jsonData =JSON.stringify({ username: username, password: password });
-    await api.post("api/signin/", jsonData)
-    .then((res: any) => {
-            setMessage(res.data.message);
-            if (res.data.qrcodeurl !== null) {
-                window.sessionStorage.setItem('USERID',res.data.id);
-                window.sessionStorage.setItem('TOKEN',res.data.token);
-                window.sessionStorage.setItem('ROLE',res.data.roles);
-                window.sessionStorage.setItem('USERPIC',res.data.userpic);
-                jQuery("#loginReset").trigger("click");
-                setIsdisabled(false);
-                jQuery("#mfaModal").trigger("click");
-            } else {
-                window.sessionStorage.setItem('USERID',res.data.id);
-                window.sessionStorage.setItem('USERNAME',res.data.username);
-                window.sessionStorage.setItem('TOKEN',res.data.token);                        
-                window.sessionStorage.setItem('ROLE',res.data.roles);
-                window.sessionStorage.setItem('USERPIC',res.data.userpic);
-                setIsdisabled(false);
-                jQuery("#loginReset").trigger('"click')
-                closeLogin;
-                navigate('/'); 
-                location.reload();
-            }
-      }, (error: any) => {
-          if (error.response) {
-            setMessage(error.response.data.message);
-          } else {
-            setMessage(error.message);
+    try {
+        await loginMutation({
+          variables: {
+            username: username,
+            password: password
           }
-          setTimeout(() => {
-              setMessage('');
-              setIsdisabled(false);
-            }, 3000);
-            return;
-    });    
+        });
+      } catch (err: any) {
+        setMessage(err.message);
+        setTimeout(() => { setMessage(''); setIsdisabled(false); }, 3000);
+      }
   }
 
   const closeLogin = (event: any) => {

@@ -9,8 +9,8 @@ from rest_framework.permissions import AllowAny
 from accounts.schema import schema
 from rest_framework.request import Request as DRFRequest
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
 from graphene_file_upload.django import FileUploadGraphQLView
+from django.utils.decorators import method_decorator
 
 class DRFGraphQLView(GraphQLView):
     def parse_body(self, request):
@@ -33,6 +33,11 @@ class DRFGraphQLView(GraphQLView):
 
 class MultipartDRFGraphQLView(FileUploadGraphQLView, DRFGraphQLView):
     pass
+
+class AuthenticatedGraphQLView(GraphQLView):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
 @api_view(['GET', 'POST'])
 @authentication_classes([TokenAuthentication])

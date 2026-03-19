@@ -1,12 +1,9 @@
-import axios from "axios"
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import { useLazyQuery } from '@apollo/client/react';
+import { LIST_QUERY } from '../graphql/list_query';
+import type { ProductListData, ProductListVariables, ProductData } from '../graphql/list_query';
 
-const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
-  headers: {'Accept': 'application/json',
-            'Content-Type': 'application/json'}
-})
 
 const toDecimal = (number: any) => {
   const formatter = new Intl.NumberFormat('en-US', {
@@ -16,23 +13,33 @@ const toDecimal = (number: any) => {
   return formatter.format(number);
 };
 export default function Prodcatalog() {
-    let [page, setPage] = useState<number>(1);
-    let [prods, setProds] = useState<[]>([]);
-    let [totpage, setTotpage] = useState<number>(0);
-    let [totalrecords, setTotalrecords] = useState<number>(0);
+    const [page, setPage] = useState<number>(1);
+    const [prods, setProds] = useState<ProductData[]>([]);
+    const [totpage, setTotpage] = useState<number>(0);
+    const [totalrecords, setTotalrecords] = useState<number>(0);
     const [message, setMessage] = useState('');
 
+    const [productList] = useLazyQuery<ProductListData, ProductListVariables>(LIST_QUERY);
+
     const fetchCatalog = async (pg: any) => {
-      api.get(`api/products/list/${pg}`)
-      .then((res: any) => {
-        setProds(res.data.products);
-        setTotpage(res.data.totpage);
-        setTotalrecords(res.data.totalrecords);
-        setPage(res.data.page);
-      }, (error: any) => {
-              setMessage(error.response.data.message);
-              return;
-      });      
+
+        try {
+            const { data } = await productList({ 
+                variables: { page: pg }
+            });
+            if (data?.productList) {
+              setPage(data.productList.page);
+              setProds(data.productList.products);
+              setTotpage(data.productList.totpage);
+              setTotalrecords(data.productList.totalrecords);
+            }            
+            return;
+        } catch (err: any) {
+            if (err.AbortError) {
+                setMessage(err.message);
+            }
+            setTimeout(() => { setMessage('');  }, 1000);
+        }
     }
 
     useEffect(() => {
@@ -41,8 +48,9 @@ export default function Prodcatalog() {
 
     const firstPage = (event: any) => {
         event.preventDefault();    
-        page = 1;
-        return fetchCatalog(page);
+        let pg:number = 1;
+        setPage(pg);
+        return fetchCatalog(pg);
       }
     
       const nextPage = (event: any) => {
@@ -51,8 +59,10 @@ export default function Prodcatalog() {
             setPage(totpage);
             return;
         } else {
-          page++;
-          return fetchCatalog(page);  
+          let pg: number = page;
+          pg++;
+          setPage(pg)
+          return fetchCatalog(pg);  
         }
       }
     
@@ -62,14 +72,17 @@ export default function Prodcatalog() {
           setPage(1);
           return;
           }
-          page--;
-          return fetchCatalog(page);
+          let pg: number = page;
+          pg--;
+          setPage(pg);
+          return fetchCatalog(pg);
       }
     
       const lastPage = (event: any) => {
         event.preventDefault();
-        page = totpage;
-        return fetchCatalog(page);
+        let pg: number = totpage;
+        setPage(pg);
+        return fetchCatalog(pg);
       }
 
     return(
@@ -81,7 +94,7 @@ export default function Prodcatalog() {
                     return (
                       <div className='col-md-4'>
                       <div key={item['id']} className="card mx-3 mt-3">
-                          <img src={item['productpicture']} className="card-img-top product-size" alt=""/>
+                          <img src={`/static/products/${item['productpicture']}`} className="card-img-top product-size" alt=""/>
                           <div className="card-body">
                             <h5 className="card-title">Descriptions</h5>
                             <p className="card-text desc-h">{item['descriptions']}</p>

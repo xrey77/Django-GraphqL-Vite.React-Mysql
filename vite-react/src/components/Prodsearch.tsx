@@ -1,11 +1,6 @@
-import axios from 'axios';
-import { useState } from 'react';
-
-const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
-  headers: {'Accept': 'application/json',
-            'Content-Type': 'application/json'}
-})
+import { useState } from 'react';import { useLazyQuery } from '@apollo/client/react';
+import { SEARCH_QUERY } from '../graphql/search_query';
+import type { ProductSearchData, ProductSearchVariables, ProductData } from '../graphql/search_query';
 
 const toDecimal = (number: any) => {
   const formatter = new Intl.NumberFormat('en-US', {
@@ -15,75 +10,78 @@ const toDecimal = (number: any) => {
   return formatter.format(number);
 };
 
-
 export default function Prodsearch() {
-  let [message, setMessage] = useState('');
-  let [prodsearch, setProdsearch] = useState<[]>([]);
-  let [page, setPage] = useState<number>(1);
-  let [totpage, setTotpage] = useState<number>(0);
-  let [totalrecords, setTotalrecords] = useState<number>(0);
-  let [searchkey, setSearchkey] = useState<string>('');
+  const [message, setMessage] = useState('');
+  const [prodsearch, setProdsearch] = useState<ProductData[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [totpage, setTotpage] = useState<number>(0);
+  const [totalrecords, setTotalrecords] = useState<number>(0);
+  const [searchkey, setSearchkey] = useState<string>('');
 
-  const getProdsearch = async (event: any) => {
+  const [productSearch] = useLazyQuery<ProductSearchData, ProductSearchVariables>(SEARCH_QUERY);
+
+  const getProdsearch = async (event: React.SubmitEvent) => {
       event.preventDefault();
       setMessage("please wait .");
-      await api.get(`api/products/search/${page}/${searchkey}`)
-      .then((res: any) => {
-          setProdsearch(res.data.products);
-          setTotpage(res.data.totpage);
-          setTotalrecords(res.data.totalrecords)
-          setPage(res.data.page);
-          setTimeout(() => {
-            setMessage('');
-          }, 1000);
-
-      }, (error: any) => {     
-        setMessage(error.response.data.message);
-        setProdsearch([]);
-        setTimeout(() => {
-            setMessage('');
-        }, 3000);
-          return;
-      });  
+        try {
+            const { data } = await productSearch({ 
+                variables: { page: page, keyword: searchkey }
+            });
+            if (data?.productSearch) {
+              setPage(data.productSearch.page);
+              setProdsearch(data.productSearch.products);
+              setTotpage(data.productSearch.totpage);
+              setTotalrecords(data.productSearch.totalrecords);
+            }            
+            setTimeout(() => { setMessage('');  }, 1000);
+            return;
+        } catch (err: any) {
+            if (err.AbortError) {
+                setMessage(err.message);
+            }
+            setMessage(err.errors[0].message);
+            setTimeout(() => { setMessage('');  }, 3000);
+        }
   }
 
   const getProdPage = async (page: number) => {
     setMessage("please wait .");
-    await api.get(`/api/products/search/${page}/${searchkey}`)
-    .then((res: any) => {
-        setProdsearch(res.data.products);
-        setTotpage(res.data.totpage);
-        setPage(res.data.page);
-        setTimeout(() => {
-          setMessage('');
-        }, 1000);
-
-
-    }, (error: any) => {        
-      setMessage(error.response.data.message);
-      setProdsearch([]);
-      setTimeout(() => {
-          setMessage('');
-      }, 3000);
-        return;
-    });  
+        try {
+            const { data } = await productSearch({ 
+                variables: { page: page, keyword: searchkey }
+            });
+            if (data?.productSearch) {
+              setPage(data.productSearch.page);
+              setProdsearch(data.productSearch.products);
+              setTotpage(data.productSearch.totpage);
+              setTotalrecords(data.productSearch.totalrecords);
+            }            
+            return;
+        } catch (err: any) {
+            if (err.AbortError) {
+                setMessage(err.message);
+            }
+            setTimeout(() => { setMessage('');  }, 1000);
+        }
 }
 
   const firstPage = (event: any) => {
     event.preventDefault();    
-    page = 1;
-    return getProdPage(page);
+    let pg: number = 1;
+    setPage(pg);
+    return getProdPage(pg);
   }
 
   const nextPage = (event: any) => {
     event.preventDefault();    
     if (page == totpage) {
-        page = 0;
         setPage(totpage);
         return;
     } else {
-      page++;
-      return getProdPage(page);  
+      let pg: number = page;
+      pg++;
+      setPage(pg);
+      return getProdPage(pg);  
     }
   }
 
@@ -93,14 +91,17 @@ export default function Prodsearch() {
       setPage(1);
       return;
       }
-      page--;
-      return getProdPage(page);
+      let pg: number = page;
+      pg--;
+      setPage(pg)
+      return getProdPage(pg);
   }
 
   const lastPage = (event: any) => {
     event.preventDefault();
-    page = totpage;
-    return getProdPage(page);
+    let pg: number = totpage;
+    setPage(pg);
+    return getProdPage(pg);
   }  
    
 return (
@@ -123,7 +124,7 @@ return (
               return (
               <div className='col-md-4'>
               <div key={item['id']} className="card mx-3 mt-3">
-                  <img src={item['productpicture']} className="card-img-top product-size" alt=""/>
+                  <img src={`/static/products/${item['productpicture']}`} className="card-img-top product-size" alt=""/>
                   <div className="card-body">
                     <h5 className="card-title">Descriptions</h5>
                     <p className="card-text desc-h">{item['descriptions']}</p>

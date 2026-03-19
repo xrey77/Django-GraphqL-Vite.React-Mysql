@@ -57,13 +57,26 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [        
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        #  'django.contrib.auth.middleware.AuthenticationMiddleware'
     ],
 }
 
 GRAPHENE = {
-    'SCHEMA': 'django_graphql.schema.schema'
+    'SCHEMA': 'django_graphql.schema.schema',
+    "MIDDLEWARE": [
+        "graphql_jwt.middleware.JSONWebTokenMiddleware",
+    ],    
 }
+
+GRAPHQL_JWT = {
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer', # Default is 'JWT' or 'Bearer'
+}
+
+AUTHENTICATION_BACKENDS = [
+    "graphql_jwt.backends.JSONWebTokenBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 
 ROOT_URLCONF = 'django_graphql.urls'
 
@@ -85,12 +98,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'django_graphql.wsgi.application'
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://localhost:5173",
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 
 # Database

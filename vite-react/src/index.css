@@ -113,14 +113,14 @@ body {
   height: 200px !important;
   object-fit: cover !important;
 }
-
 .user {
-  width: 35px;
-  height: 35px;
+  width: 30px !important;
+  height: 30px !important;
   border-radius: 50%;
+  margin-left: -20px !important;
 }
 .logo {
-  width: 150px;
+  width: 90px;
   height: 35px;
 }
 .contact-bg {
@@ -287,3 +287,35 @@ body {
   padding: 15px;
   background-color: #ddd; /* Background color helps the effect stand out */  
  }
+
+
+  @media (max-width: 991.98px) { 
+    .qrcode-ml {
+      width: 350px !important;
+      margin-left: 230px !important;
+      margin-top: -200px !important;
+      height: 50vh !important;
+
+    }
+  }
+
+  @media (max-width: 575.98px) { 
+    .qrcode-ml {
+      margin-top: 10px !important;
+      margin-left: 10px !important;
+      width: 350px !important;
+      height: 800vh !important;
+    }
+  .scroll-xs-only {
+    max-height: 1800px; 
+    overflow-y: auto;
+  }    
+ }
+
+.btn-print {
+  display: flex;
+  justify-content: center; /* Horizontal centering */
+  align-items: center;     /* Vertical centering */
+  height: 100px;  
+  padding: 20px;  
+}

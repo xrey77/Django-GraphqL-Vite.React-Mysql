@@ -1,12 +1,7 @@
-import axios from 'axios';
 import { useState, useEffect } from 'react';
-
-const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
-  headers: {'Accept': 'application/json',
-            'Content-Type': 'application/json'}
-})
-
+import { useLazyQuery } from '@apollo/client/react';
+import { LIST_QUERY } from '../graphql/list_query';
+import type { ProductListData, ProductListVariables, ProductData } from '../graphql/list_query';
 
 export default function Prodlist() {
 
@@ -18,23 +13,37 @@ export default function Prodlist() {
     return formatter.format(number);
   };
 
-    let [page, setPage] = useState<number>(1);
-    let [totpage, setTotpage] = useState<number>(0);
-    let [totalrecs, setTotalrecs] = useState<number>(0);
+    const [page, setPage] = useState<number>(1);
+    const [totpage, setTotpage] = useState<number>(0);
+    const [totalrecs, setTotalrecs] = useState<number>(0);
+    const [message, setMessage] = useState<string>('');
 
-    let [products, setProducts] = useState<[]>([]);
+    const [products, setProducts] = useState<ProductData[]>([]);
 
-    const fetchProducts = (pg: any) => {
-      api.get(`api/products/list/${pg}`)
-      .then((res: any) => {
-        setProducts(res.data.products);
-        setTotpage(res.data.totpage);
-        setTotalrecs(res.data.totalrecords);
-        setPage(res.data.page);
-      }, (error: any) => {
-              console.log(error.response.data.message);
-              return;
-      });      
+
+    const [productList] = useLazyQuery<ProductListData, ProductListVariables>(LIST_QUERY);
+
+
+    const fetchProducts = async (pg: any) => {
+
+        try {
+            const { data } = await productList({ 
+                variables: { page: pg }
+            });
+
+            if (data?.productList) {
+              setPage(data.productList.page);
+              setProducts(data.productList.products);
+              setTotpage(data.productList.totpage);
+              setTotalrecs(data.productList.totalrecords);
+            }            
+            return;
+        } catch (err: any) {
+            if (err.AbortError) {
+                setMessage(err.message);
+            }
+            setTimeout(() => { setMessage('');  }, 1000);
+        }
     }
 
     useEffect(() => {
@@ -43,8 +52,9 @@ export default function Prodlist() {
 
     const firstPage = (event: any) => {
         event.preventDefault();    
-        page = 1;
-        fetchProducts(page);
+        let pg: number = 1;
+        setPage(pg);
+        fetchProducts(pg);
         return;    
       }
     
@@ -54,8 +64,10 @@ export default function Prodlist() {
             setPage(totpage);
             return;
         }
-        page++;
-        return fetchProducts(page);
+        let pg: number = page;
+        pg++;
+        setPage(pg);
+        return fetchProducts(pg);
       }
     
       const prevPage = (event: any) => {
@@ -63,23 +75,26 @@ export default function Prodlist() {
         if (page === 1) {
           return;
           }
-          page--;
-          return fetchProducts(page);
+          let pg: number = page;
+          pg--;
+          setPage(pg);
+          return fetchProducts(pg);
       }
     
       const lastPage = (event: any) => {
         event.preventDefault();
-        page = totpage;
-        return fetchProducts(page);
+        let pg: number = totpage;
+        setPage(pg);
+        return fetchProducts(pg);
       }  
   
   return (
     <div className="container">
             <h1 className='text-warning embossed mt-3'>Products List</h1>
-
+            <div className='text-white'>{message}</div>
             <table className="table table-danger table-striped">
             <thead>
-                <tr>
+                <tr> 
                 <th className="bg-primary text-white" scope="col">#</th>
                 <th className="bg-primary text-white" scope="col">Descriptions</th>
                 <th className="bg-primary text-white" scope="col">Qty</th>

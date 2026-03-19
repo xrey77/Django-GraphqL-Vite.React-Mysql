@@ -1,14 +1,18 @@
-<h3>Python 3.10.0 / Django 5.2.8, Vite 8.0.0 + React 19.2.4 and MySql Start-up Project</h3>
+<h3>Django 5.2.8, Graphene GraphQL, React 19.2.4 and MySql Start-up Project</h3>
 
 <p>React Dependencies</p>
 <p>1. Node 23.5.0</p>
 <p>2. Npm 11.1.</p>
-
+<p>3. Vite 8.0.0</p>
+<br/>
+<p>Django Dependencies</p>
+<p>Python 3.10.0</p>
+<br/>
 <p>Requirements: </p>
 <p>1. MySQL Management</p>
 <p>2. Vite + React - Typescript</p>
 <p>3. Install Google or Microsoft Authenticator in your Mobile Phone</p>
-
+<br/>
 <p>FEATURES:</p>
 <p>1. User Login, Logout and Account Registration</p>
 <p>2. Multi-Factor Authenticator (MFA)</p>

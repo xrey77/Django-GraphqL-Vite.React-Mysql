@@ -10,18 +10,11 @@ export default function Header() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const usrname = sessionStorage.getItem('USERNAME');    
-    if (usrname === null) {
-      setUsername('');
-    } else {
-      setUsername(usrname);
-    }
-    const usrpic = sessionStorage.getItem("USERPIC");
-    if (usrpic === null) {
-      setUserpic('/images/pix.png');
-    } else {
-      setUserpic(usrpic);
-    }
+    const usrname = sessionStorage.getItem('USERNAME') ?? '';
+    setUsername(usrname);
+    const usrpic = sessionStorage.getItem("USERPIC") ?? '';
+    setUserpic(usrpic);
+
   },[username, userpic]);
 
   const Logout = () => {
@@ -29,6 +22,7 @@ export default function Header() {
     sessionStorage.removeItem('USERNAME');
     sessionStorage.removeItem('USERPIC');
     sessionStorage.removeItem('TOKEN');
+    sessionStorage.clear();
     navigate('/'); 
     location.reload();
   }
@@ -50,12 +44,27 @@ export default function Header() {
             Products
           </a>
           <ul className="dropdown-menu">
-            <li><Link className="dropdown-item" to="/productlist">Prodcuts List</Link></li>
+            <li><Link className="dropdown-item" to="/productlist">Products List</Link></li>
             <li><Link className="dropdown-item" to="/productcatalog">Products Catalog</Link></li>
             <li><hr className="dropdown-divider"/></li>
             <li><Link className="dropdown-item" to="/productsearch">Product Search</Link></li>
           </ul>
         </li>
+
+        <li className="nav-item dropdown">
+          <a className="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Reports
+          </a>
+          <ul className="dropdown-menu">
+            <li><Link className="dropdown-item" to="/productreport">Products Report-PDF</Link></li>
+            <li><Link className="dropdown-item" to="/saleschart">Annual Sales Chart</Link></li>
+            <li><hr className="dropdown-divider"/></li>
+            <li><Link className="dropdown-item" to="/productcategory">Product Report by Category</Link></li>
+
+          </ul>
+        </li>
+
+
         <li className="nav-item">
           <Link className="nav-link text-white" to="/contact">Contact Us</Link>
         </li>
@@ -72,7 +81,9 @@ export default function Header() {
       ): (
         <ul className="navbar-nav mr-auto mb-2 mb-lg-0">
           <li className="nav-item dropdown">
-          <Link className="nav-link dropdown-toggle" to="/#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><img className="user" src={userpic} alt=""/>&nbsp;<span className='text-white'>{username}</span></Link>
+          <a className="nav-link dropdown-toggle" href="/#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img className="user" src={userpic} alt=""/>&nbsp;<span className='text-white'>{username}</span>
+          </a>
           <ul className="dropdown-menu">
             <li><a onClick={Logout} className="dropdown-item" href="/#">Log-Off</a></li>
             <li><Link className="dropdown-item" to="/profile">Profile</Link></li>
@@ -112,6 +123,23 @@ export default function Header() {
               <Link className="dropdown-item" to="/productsearch">Product Search</Link></li>
           </ul>
         </li>
+
+        <li><hr/></li>
+        <li className="nav-item dropdown">
+          <Link className="nav-link dropdown-toggle text-dark embossed" to="/#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Reports
+          </Link>
+          <ul className="dropdown-menu">
+            <li data-bs-dismiss="offcanvas">
+              <Link className="dropdown-item" to="/productreport">Products Report-PDF</Link></li>
+            <li data-bs-dismiss="offcanvas">
+              <Link className="dropdown-item" to="/saleschart">Annual Sales Chart</Link></li>
+            <li data-bs-dismiss="offcanvas">
+              <Link className="dropdown-item" to="/productcategory">Product Report by Category</Link></li>
+          </ul>
+        </li>
+
+
         <li><hr/></li>
   
         <li className="nav-item" data-bs-dismiss="offcanvas">

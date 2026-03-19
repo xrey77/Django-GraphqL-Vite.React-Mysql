@@ -1,12 +1,7 @@
 import { useState } from "react";
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
-  headers: {'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          }
-})
+import { useMutation as useApolloMutation } from '@apollo/client/react';
+import { SIGNUP_MUTATION } from "../graphql/regiter_query";
+import type { CreateUserData, CreateUserVariables } from "../graphql/regiter_query";
 
 export default function Register() {
   const [firstname, setFirstname] = useState('');
@@ -17,29 +12,38 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
 
-  
+  const [userMutation] = useApolloMutation<CreateUserData, CreateUserVariables>(SIGNUP_MUTATION, {
+      onCompleted: (data: any) => {
+        setMessage(data.userMutation.message);
+        setTimeout(() => { setMessage(''); }, 3000);
+      },
+      onError: (err: any) => {
+        console.log(err);
+        setMessage(err.message);
+        setTimeout(() => { setMessage(''); }, 3000);
+      }
+  });
 
-  const submitRegistration = (event: any) => {
+  const submitRegistration = async (event: React.SubmitEvent) => {
     event.preventDefault();
     setMessage('please wait...');
-    const jsonData =JSON.stringify({ lastname: lastname, firstname: firstname,email: email, mobile: mobile,
-      username: username, password: password });
-     api.post('api/signup/', jsonData)
-    .then((res: any) => {
-          setMessage(res.data.message);
-          setTimeout(() => {
-            setMessage('');
-          }, 3000);
-          return;
-      }, (error: any) => {
-        setMessage(error.response.data.message);
-        setTimeout(() => {
-          setMessage('');
-        }, 3000);
-        return;
-    });    
+   try {
+      await userMutation({
+        variables: {
+           firstName: firstname, 
+           lastName: lastname, 
+           email: email, 
+           mobile: mobile, 
+           username: username, 
+           password: password 
+        }
+      });
+    } catch (err: any) {
+      console.log(err.message);
+      setTimeout(() => { setMessage(''); }, 3000);
+    }
   }
-
+  
   const closeRegistration = (event: any) => {
     event.preventDefault();
     setFirstname('');
@@ -115,3 +119,4 @@ export default function Register() {
     </div>            
   );  
 }
+

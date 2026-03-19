@@ -1,43 +1,53 @@
 import { useState } from "react"
 import jQuery from "jquery";
-import axios from 'axios';
-
-const api = axios.create({
-   baseURL: "http://127.0.0.1:8000",
-   headers: {'Accept': 'application/json',
-             'Content-Type': 'application/json'}
-})
+import { VERIFY_OTP } from "../graphql/verifytotp";
+import type { OtpVerificationData, OtpVerificationVariables } from "../graphql/verifytotp";
+import { useMutation as useApolloMutation } from '@apollo/client/react';
 
 export default function Mfa() {
   const [otp, setOtp] = useState<string>('');
   const [message, setMessage] = useState<string>('');
 
-  const submitMfa = (event: any) => {
+  const [OtpResponse] = useApolloMutation<OtpVerificationData, OtpVerificationVariables>(VERIFY_OTP, {
+      onCompleted: (data: any) => {
+          setMessage(data.OtpResponse.message);
+          sessionStorage.setItem("USERNAME", data.OtpResponse.username);            
+          window.setTimeout(() => {
+            setMessage('');
+            jQuery("#mfaReset").trigger('click');
+            window.location.reload();
+          }, 3000);
+      },
+      onError: (err: any) => {
+          setMessage(err.message);
+          setTimeout(() => { setMessage(''); }, 3000);
+      }
+  });
+
+
+  const submitMfa = async (event: React.SubmitEvent) => {
     event.preventDefault();
 
-    const userid = sessionStorage.getItem('USERID');
-    const token = sessionStorage.getItem('TOKEN');
+    const userid = sessionStorage.getItem('USERID') ?? '';
+    const token = sessionStorage.getItem('TOKEN') ?? '';
     setMessage('please wait..');
-    const jsonData =JSON.stringify({otp: otp });
-    api.patch(`api/mfa/verifytotp/${userid}/`, jsonData, {headers: {
-      Authorization: `Bearer ${token}`
-  }})
-    .then((res: any) => {
-          setMessage(res.data.message);
-            sessionStorage.setItem("USERNAME", res.data.username);
-            window.setTimeout(() => {
-              setMessage('');
-              jQuery("#mfaReset").trigger('click');
-              window.location.reload();
-            }, 3000);
-      }, (error: any) => {
-        console.log(error);
-            setMessage(error.response.data.message);            
-            window.setTimeout(() => {
-              setMessage('');
-            }, 3000);
-            return;
-    });        
+
+    try {
+        await OtpResponse({
+            variables: {
+                input: { 
+                  id: parseInt(userid), otp: otp },
+            },
+            context: {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        });
+    } catch (err: any) {
+        setMessage(err.message);
+        setTimeout(() => { setMessage(''); }, 3000);
+    }
   }
 
   const closeMfa = (event: any) => {
@@ -56,7 +66,7 @@ export default function Mfa() {
       <div className="modal-dialog modal-sm modal-dialog-centered">
         <div className="modal-content">
           <div className="modal-header bg-info">
-            <h1 className="modal-title fs-5 text-dark" id="staticMfaLabel">Multi-Factor Authenticator</h1>
+            <div className="modal-title fs-5 text-dark" id="staticMfaLabel">Multi-Factor Authenticator</div>
             <button onClick={closeMfa} type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div className="modal-body">

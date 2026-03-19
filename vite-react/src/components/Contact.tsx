@@ -13,8 +13,8 @@ export default function Contact() {
             <div className="card-body">
               <h2 className="card-title text-white embossed">Contact Us</h2>
               <p className="card-text text-white txt-justified">
-              NCR Voyix Corporation, previously known as NCR Corporation and National Cash Register, is a global software, consulting and technology company providing several professional services and electronic products. It manufactured self-service kiosks, point-of-sale terminals, automated teller machines, check processing systems, and barcode scanners.<br/><br/>
-              NCR's U.S. headquarters is in Atlanta, Georgia, which serves as the central hub for their global operations and attracts employees and customers. The company, now split into two entities (NCR Voyix and NCR Atleos), focuses on different areas but maintains its presence in Atlanta. 
+              Diebold Nixdor Corporation, previously known as Wincor-Nixdorf and Direct Cash Register, is a global software, consulting and technology company providing several professional services and electronic products. It manufactured self-service kiosks, point-of-sale terminals, automated teller machines, check processing systems, and barcode scanners.<br/><br/>
+              Diebold Nixdorf's U.S. headquarters is in Atlanta, Georgia, which serves as the central hub for their global operations and attracts employees and customers. The company, now split into two entities, focuses on different areas but maintains its presence in Atlanta. 
                 </p>
               <p className="card-text"><small className="text-body-secondary">
               <strong>NCR's U.S. Headquarters</strong> <br/>

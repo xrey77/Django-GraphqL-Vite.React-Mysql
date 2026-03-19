@@ -4,7 +4,7 @@ from graphene_django import DjangoObjectType
 from typing import List, Optional
 from accounts.models import User
 from .graphql.queries.users_query import UsersQuery
-from .graphql.queries.userid_query import UserIdQuery
+from .graphql.queries.userid_query import UserId
 from .graphql.mutations.register_resolver import RegisterMutation
 from .graphql.mutations.login_resolver import LoginMutation
 from .graphql.mutations.updateProfile_resolver import UpdateProfileMutation
@@ -15,11 +15,11 @@ from .graphql.mutations.uploadpic_resolver import UploadPictureMutation
 from .graphql.types.userType import UserModelType
 
 class Query(graphene.ObjectType):    
-    getuser_id = graphene.Field(UserIdQuery)
+    getuser_id = graphene.Field(UserId)
     users_query = graphene.Field(lambda: UsersQuery) 
 
     def resolve_getuser_id(root, info):
-        return User.objects.first()
+        return UserId()
 
     def resolve_users_query(root, info):
         return UsersQuery()
