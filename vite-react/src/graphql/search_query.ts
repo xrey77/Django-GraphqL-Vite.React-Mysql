@@ -1,27 +1,32 @@
 import { gql } from '@apollo/client';
 
 export const SEARCH_QUERY = gql`
-  query ProductSearch($keyword: String!, $page: Int!) {
-    productSearch(keyword: $keyword, page: $page) {   
-     page
-     totpage
-     totalrecords
-     products {
-       id
-       category
-       descriptions
-       qty
-       unit
-       costprice
-       sellprice
-       saleprice
-       productpicture
-       alertstocks
-       criticalstocks    
+  query SearchProduct($page: Int!, $keyword: String!) {
+  searchProducts{
+    searchProduct(page: $page, keyword: $keyword) {
+      page
+      totpage
+      totalrecords
+      products {
+        id
+        category
+        descriptions
+        qty
+        unit
+        costprice
+        sellprice
+        saleprice
+        productpicture
+        alertstocks
+        criticalstocks
+      }
     }
-   }
+  }
   }
 `;
+
+
+
 
 export interface ProductData {
     id: number
@@ -38,11 +43,13 @@ export interface ProductData {
 }
 
 export interface ProductSearchData {
-  productSearch: {
-    page: number;
-    totpage: number;
-    totalrecords: number;
-    products: ProductData[];
+  searchProducts: {
+    searchProduct: {
+      page: number;
+      totpage: number;
+      totalrecords: number;
+      products: ProductData[];
+    }
   };  
 }
 

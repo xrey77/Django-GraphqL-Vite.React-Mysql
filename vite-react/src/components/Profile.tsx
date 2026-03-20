@@ -47,21 +47,19 @@ export default function Profile() {
                     },
                 },
             });
-            console.log(data);  
             if (data?.getuserId) {
                 setLname(data.getuserId.user.lastName);
                 setFname(data.getuserId.user.firstName);
                 setEmail(data.getuserId.user.email);
                 setMobile(data.getuserId.user.mobile);
-                setUserpicture(`http://127.0.0.1:8000/static/users/${data.getuserId.user.userpicture}`);
-                setQrcodeurl(data.getuserId.user.qrcodeurl ?? 'http://127.0.0.1:8000/static/images/qrcode.png');
+                setUserpicture(`/static/users/${data.getuserId.user.userpicture}`);
+                setQrcodeurl(data.getuserId.user.qrcodeurl ?? '/static/images/qrcode.png');
             }            
             return;
         } catch (err: any) {
-            console.log(err);            
-            // if (err.AbortError) {
+            if (err.AbortError) {
                 setProfileMsg(err.message);
-            // }
+            }
             setTimeout(() => { setProfileMsg('');  }, 1000);
         }
     };    
@@ -82,9 +80,9 @@ export default function Profile() {
     },[userid, token]) 
 
 
-    const [updateProfile] = useApolloMutation<ProfiledData, ProfileVariables>(UPDATE_PROFILE, {
+    const [updateMutation] = useApolloMutation<ProfiledData, ProfileVariables>(UPDATE_PROFILE, {
         onCompleted: (data: any) => {
-            setProfileMsg(data.updateProfile.message);
+            setProfileMsg(data.updateMutation.message);
             setTimeout(() => { setProfileMsg(''); }, 3000);
         },
         onError: (err: any) => {
@@ -96,8 +94,12 @@ export default function Profile() {
     const submitProfile = async (event: React.SubmitEvent) => {
         event.preventDefault();
         try {
-            await updateProfile({
-                variables: {input: { id: userid, firstname: fname, lastname: lname, mobile: mobile }
+            await updateMutation({
+                variables: { 
+                    id: userid,
+                    firstName: fname,
+                    lastName: lname,
+                    mobile: mobile 
                 },
                 context: {
                     headers: {
@@ -106,22 +108,24 @@ export default function Profile() {
                 },
             });
         } catch (err: any) {
+            setProfileMsg(err.message);
             setTimeout(() => { setProfileMsg(''); }, 3000);
         }
     }
 
-    const [UploadResponse] = useApolloMutation<UploadData, UploadVariables>(UPLOAD_PICTURE, {
+    const [uploadPicture] = useApolloMutation<UploadData, UploadVariables>(UPLOAD_PICTURE, {
         onCompleted: (data: any) => {
-            setProfileMsg(data.UploadResponse.message);
+            setProfileMsg(data.uploadPicture.message);
             setTimeout(() => { 
                 setProfileMsg(''); 
-                let userpic: string = `/static/users/${data.upload_picture.userpic}`;
+                let userpic: string = `/static/users/${data.uploadPicture.userpicture}`;
                 setUserpicture(userpic);
                 sessionStorage.setItem('USERPIC',userpic);
                 window.location.reload();
             }, 3000);
         },
         onError: (err: any) => {
+            console.log(err);
             setProfileMsg(err.message);
             setTimeout(() => { setProfileMsg(''); }, 3000);
         }
@@ -132,20 +136,24 @@ export default function Profile() {
         const file = e.target.files[0];
         var pix = URL.createObjectURL(file);
         jQuery('#userpic').attr('src', pix)
-
-        await UploadResponse({
-            variables: {
-                input: {
+        try {
+            await uploadPicture({
+                variables: {
                     id: userid,
                     file: file, 
                 },
-            },
-            context: {
-                headers: {
-                    Authorization: `Bearer ${token}`,
+                context: {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 },
-            },
-        });
+            });
+        } catch (err: any) {
+            console.log(err);
+            setProfileMsg(err.message);
+            setTimeout(() => { setProfileMsg(''); }, 3000);
+        }
+
     }
   };
 
@@ -176,13 +184,13 @@ export default function Profile() {
         }
     }
 
-    const [MfaActivationResponse] = useApolloMutation<MfaActivationData, MfaActivationVariables>(ACTIVATE_MFA, {
+    const [activateMfa] = useApolloMutation<MfaActivationData, MfaActivationVariables>(ACTIVATE_MFA, {
         onCompleted: (data: any) => {
-            setProfileMsg(data.MfaActivationResponse.message);
-            if (data.MfaActivationResponse.qrcodeurl === null) {
+            setProfileMsg(data.activateMfa.message);
+            if (data.activateMfa.qrcodeurl === null) {
                 setQrcodeurl("/static/images/qrcode.png");
             } else {
-                setQrcodeurl(data.MfaActivationResponse.qrcodeurl);
+                setQrcodeurl(data.activateMfa.qrcodeurl);
             }
             setTimeout(() => { setProfileMsg(''); }, 3000);
         },
@@ -195,9 +203,9 @@ export default function Profile() {
 
     const enableMFA = async () => {
         try {
-            await MfaActivationResponse({
+            await activateMfa({
                 variables: {
-                    input: { id: userid, twofactorenabled: true }
+                    id: userid, twofactorenabled: true
                 },
                 context: {
                     headers: {
@@ -212,9 +220,9 @@ export default function Profile() {
 
     const disableMFA = async () => {
         try {
-            await MfaActivationResponse({
+            await activateMfa({
                 variables: {
-                    input: { id: userid, twofactorenabled: false }
+                    id: userid, twofactorenabled: false
                 },
                 context: {
                     headers: {
@@ -223,15 +231,13 @@ export default function Profile() {
                 },
             });
         } catch (err: any) {
-            alert("error 2");
             setTimeout(() => { setProfileMsg(''); }, 3000);
         }
-
     }
 
-    const [UpdatePasswordResponse] = useApolloMutation<PasswordData, PasswordVariables>(CHANGE_PASSWORD, {
+    const [updatePassword] = useApolloMutation<PasswordData, PasswordVariables>(CHANGE_PASSWORD, {
         onCompleted: (data: any) => {
-            setProfileMsg(data.UpdatePasswordResponse.message);
+            setProfileMsg(data.updatePassword.message);
             setTimeout(() => { setProfileMsg(''); }, 3000);
         },
         onError: (err: any) => {
@@ -266,9 +272,10 @@ export default function Profile() {
         }
 
         try {
-            await UpdatePasswordResponse({
+            await updatePassword({
                 variables: {
-                    input: { id: userid,  password: newpassword }
+                    id: userid,
+                    newPassword: newpassword 
                 },
                 context: {
                     headers: {

@@ -11,6 +11,7 @@ from .graphql.mutations.updateProfile_resolver import UpdateProfileMutation
 from .graphql.mutations.updatePassword_resolver import UpdatePasswordMutation
 from .graphql.mutations.activatemfa_resolver import ActivateMfaMutation
 from .graphql.mutations.uploadpic_resolver import UploadPictureMutation
+from .graphql.mutations.verifytotp_resolver import VerifyTotpMutation
 
 from .graphql.types.userType import UserModelType
 
@@ -24,7 +25,6 @@ class Query(graphene.ObjectType):
     def resolve_users_query(root, info):
         return UsersQuery()
 
-
 class Mutation(graphene.ObjectType):
     user_mutation = RegisterMutation.Field()
     login_mutation = LoginMutation.Field()
@@ -32,6 +32,7 @@ class Mutation(graphene.ObjectType):
     update_password = UpdatePasswordMutation.Field()
     activate_mfa = ActivateMfaMutation.Field()
     upload_picture = UploadPictureMutation.Field()
+    verify_totp = VerifyTotpMutation.Field()
 
 schema = graphene.Schema(
     query=Query, 

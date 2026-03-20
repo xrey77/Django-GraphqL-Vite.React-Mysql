@@ -8,7 +8,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=100, blank=True)    
     email = models.EmailField(max_length=100, unique=True)    
     mobile = models.CharField(max_length=50, blank=True, null=True)    
-    username = models.CharField(max_length=100, unique=True)        
+    username = models.CharField(max_length=100, unique=True, db_collation="utf8mb4_bin")        
     userpicture = models.CharField(max_length=100, blank=True, db_default='pix.png')
     is_blocked = models.BooleanField(default=False)   
     is_activated = models.BooleanField(default=True)   

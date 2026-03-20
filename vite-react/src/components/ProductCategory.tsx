@@ -4,19 +4,20 @@ import type { Category, ProductCategoriesData } from '../graphql/productCategory
 import { useEffect, useState } from 'react';
 import { InventoryReport } from './CategoryTemplate.tsx';
 import { PDFViewer } from '@react-pdf/renderer';
+import { useWindowSize } from '../useWindowSize.ts';
 
 export default function ProductCategory() {
     const [message, setMessage] = useState<string>('');
     const [categoryData, setCategoryData] = useState<Category[]>([]);
 
-    const [fetchCategory] = useLazyQuery<ProductCategoriesData>(PRODUCT_CATEGORY_QUERY);
+    const [products] = useLazyQuery<ProductCategoriesData>(PRODUCT_CATEGORY_QUERY);
 
     const getCategories = async () => {
         setMessage("Loading inventory data...");
         try {
-            const { data } = await fetchCategory();
-            if (data?.categoryList) {              
-                setCategoryData(data.categoryList);
+            const { data } = await products();
+            if (data?.productsCategory) {              
+                setCategoryData(data.productsCategory);
             }                
 
         } catch (err: any) {  
@@ -27,19 +28,22 @@ export default function ProductCategory() {
         }
 
     }
-
+    const { width, height } = useWindowSize();
     useEffect(() => {
         getCategories()
+        
     },[])
 
   return (
   <div className="container-fluid">
 
 {categoryData ? (
-  <div className="container-fluid "> 
-    <PDFViewer width={1000} height={800}>
-      <InventoryReport data={{ categoryList: categoryData }} />
+  
+  <div className="container-fluid"> 
+    <PDFViewer width={width-50} height={height}>
+      <InventoryReport data={{ productsCategory: categoryData }} />
     </PDFViewer>
+    <br/><br/><br/><br/>
   </div>
 ) : (
   <p>{message}</p>

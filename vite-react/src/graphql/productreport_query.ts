@@ -1,25 +1,22 @@
 import { gql } from '@apollo/client';
 
 export const LIST_QUERY = gql`
-  query ProductList($page: Int!) {
-    product_list(page: $page) {    
-     page
-     totpage
-     totalrecords
-     products {
-       id
-       category
-       descriptions
-       qty
-       unit
-       costprice
-       sellprice
-       saleprice
-       productpicture
-       alertstocks
-       criticalstocks    
+  query GetProducts{
+    products{
+      reports {
+        id
+        category
+        descriptions
+        qty
+        unit
+        costprice
+        sellprice
+        saleprice
+        productpicture
+        alertstocks
+        criticalstocks      
+      }
     }
-   }
   }
 `;
 
@@ -38,14 +35,13 @@ export interface ProductData {
 }
 
 export interface ProductListData {
-    page: number;
-    totpage: number;
-    totalrecords: number;
-    products: ProductData[];
+    products: {
+      reports: ProductData[]
+    }
 }
 
-export interface ProductListVariables {
-  page: number;
-}
+// export interface ProductListVariables {
+//   page: number;
+// }
 
 

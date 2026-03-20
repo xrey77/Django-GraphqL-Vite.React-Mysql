@@ -21,28 +21,27 @@ export default function Prodlist() {
     const [products, setProducts] = useState<ProductData[]>([]);
 
 
-    const [productList] = useLazyQuery<ProductListData, ProductListVariables>(LIST_QUERY);
+    const [productsList] = useLazyQuery<ProductListData, ProductListVariables>(LIST_QUERY);
 
 
     const fetchProducts = async (pg: any) => {
 
         try {
-            const { data } = await productList({ 
+            const { data } = await productsList({ 
                 variables: { page: pg }
             });
-
-            if (data?.productList) {
-              setPage(data.productList.page);
-              setProducts(data.productList.products);
-              setTotpage(data.productList.totpage);
-              setTotalrecs(data.productList.totalrecords);
+            if (data?.pageProducts.productsList) {
+              setPage(data.pageProducts.productsList.page);
+              setProducts(data.pageProducts.productsList.products);
+              setTotpage(data.pageProducts.productsList.totpage);
+              setTotalrecs(data.pageProducts.productsList.totalrecords);
             }            
             return;
         } catch (err: any) {
             if (err.AbortError) {
                 setMessage(err.message);
             }
-            setTimeout(() => { setMessage('');  }, 1000);
+            // setTimeout(() => { setMessage('');  }, 1000);
         }
     }
 

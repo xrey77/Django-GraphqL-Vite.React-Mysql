@@ -19,19 +19,19 @@ export default function Prodcatalog() {
     const [totalrecords, setTotalrecords] = useState<number>(0);
     const [message, setMessage] = useState('');
 
-    const [productList] = useLazyQuery<ProductListData, ProductListVariables>(LIST_QUERY);
+    const [productsList] = useLazyQuery<ProductListData, ProductListVariables>(LIST_QUERY);
 
     const fetchCatalog = async (pg: any) => {
 
         try {
-            const { data } = await productList({ 
+            const { data } = await productsList({ 
                 variables: { page: pg }
             });
-            if (data?.productList) {
-              setPage(data.productList.page);
-              setProds(data.productList.products);
-              setTotpage(data.productList.totpage);
-              setTotalrecords(data.productList.totalrecords);
+            if (data?.pageProducts.productsList) {
+              setPage(data.pageProducts.productsList.page);
+              setProds(data.pageProducts.productsList.products);
+              setTotpage(data.pageProducts.productsList.totpage);
+              setTotalrecords(data.pageProducts.productsList.totalrecords);
             }            
             return;
         } catch (err: any) {

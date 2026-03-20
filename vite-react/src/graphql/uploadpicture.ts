@@ -1,35 +1,34 @@
 import { gql } from '@apollo/client';
 
+
 export const UPLOAD_PICTURE = gql`
-  mutation UploadPicture($input: UploadInput!) {
-    UploadResponse(input: $input) {
-        message
-        userpic
+  mutation UploadPicture($id: Int!, $file: Upload!) {
+    uploadPicture(id: $id, file: $file) {
+      userpicture
+      message  
     }
   }
 `;
 
 export interface UserData {
   id: number;
-  firstname: string;
-  lastname: string;
+  firstName: string;
+  lastName: string;
   email: string;
   mobile: string;
   username: string;
-  isactivated: boolean;
-  isblocked: boolean;
+  isActivated: boolean;
+  isBlocked: boolean;
   mailtoken: string;
-  userpic: string;
+  userpicture: string;
   qrcodeurl: string;
 }
 
 export interface UploadData {
-  user: UserData;
+  uploadPicture: UserData;
 }
 
 export interface UploadVariables {
-  input: {
     id: number;
     file: File;
-  }
 }

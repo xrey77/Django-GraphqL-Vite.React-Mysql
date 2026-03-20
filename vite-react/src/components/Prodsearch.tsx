@@ -18,20 +18,20 @@ export default function Prodsearch() {
   const [totalrecords, setTotalrecords] = useState<number>(0);
   const [searchkey, setSearchkey] = useState<string>('');
 
-  const [productSearch] = useLazyQuery<ProductSearchData, ProductSearchVariables>(SEARCH_QUERY);
+  const [searchProduct] = useLazyQuery<ProductSearchData, ProductSearchVariables>(SEARCH_QUERY);
 
   const getProdsearch = async (event: React.SubmitEvent) => {
       event.preventDefault();
       setMessage("please wait .");
         try {
-            const { data } = await productSearch({ 
+            const { data } = await searchProduct({ 
                 variables: { page: page, keyword: searchkey }
             });
-            if (data?.productSearch) {
-              setPage(data.productSearch.page);
-              setProdsearch(data.productSearch.products);
-              setTotpage(data.productSearch.totpage);
-              setTotalrecords(data.productSearch.totalrecords);
+            if (data?.searchProducts.searchProduct) {
+              setPage(data.searchProducts.searchProduct.page);
+              setProdsearch(data.searchProducts.searchProduct.products);
+              setTotpage(data.searchProducts.searchProduct.totpage);
+              setTotalrecords(data.searchProducts.searchProduct.totalrecords);
             }            
             setTimeout(() => { setMessage('');  }, 1000);
             return;
@@ -40,21 +40,20 @@ export default function Prodsearch() {
                 setMessage(err.message);
             }
             setMessage(err.errors[0].message);
-            setTimeout(() => { setMessage('');  }, 3000);
+            setTimeout(() => { setMessage(''); setProdsearch([]); setTotalrecords(0) }, 3000);
         }
   }
 
   const getProdPage = async (page: number) => {
-    setMessage("please wait .");
         try {
-            const { data } = await productSearch({ 
+            const { data } = await searchProduct({ 
                 variables: { page: page, keyword: searchkey }
             });
-            if (data?.productSearch) {
-              setPage(data.productSearch.page);
-              setProdsearch(data.productSearch.products);
-              setTotpage(data.productSearch.totpage);
-              setTotalrecords(data.productSearch.totalrecords);
+            if (data?.searchProducts.searchProduct) {
+              setPage(data.searchProducts.searchProduct.page);
+              setProdsearch(data.searchProducts.searchProduct.products);
+              setTotpage(data.searchProducts.searchProduct.totpage);
+              setTotalrecords(data.searchProducts.searchProduct.totalrecords);
             }            
             return;
         } catch (err: any) {
@@ -139,7 +138,7 @@ return (
       })}
         </div>          
         {
-          totpage > 1 ? 
+          totalrecords > 5 ? 
           <>
           <nav aria-label="Page navigation example">
             <ul className="pagination sm mt-3">
@@ -153,7 +152,7 @@ return (
           <div className='text-warning'><strong>Total Records : {totalrecords}</strong></div>
           </>
         :
-        null
+            <div className='text-warning'><strong>Total Records : {totalrecords}</strong></div>
         }
 
         <br/><br/><br/>

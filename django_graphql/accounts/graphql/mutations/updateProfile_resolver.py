@@ -1,6 +1,6 @@
 import graphene
-from rest_framework.authtoken.models import Token
-from graphql import GraphQLError
+from graphql_jwt.decorators import login_required
+from accounts.models import User
 from accounts.graphql.types.userType import UserModelType 
 
 class UpadateProfileResponse(graphene.ObjectType):
@@ -8,35 +8,36 @@ class UpadateProfileResponse(graphene.ObjectType):
 
 class UpdateProfileMutation(graphene.Mutation):
     class Arguments:
+        id = graphene.Int(required=True)
         first_name = graphene.String(required=True)        
         last_name = graphene.String(required=True)
         mobile = graphene.String(required=True)
 
     message = graphene.String()
 
-    def mutate(self, info, first_name, last_name, mobile):
-        user = info.context.user
+    @login_required
+    def mutate(self, info, id, first_name, last_name, mobile):
+        try:
 
-        if not user.is_authenticated:
-            raise Exception("Authentication required")
+            user = User.objects.get(pk=id)
+            
+            user.first_name = first_name
+            user.last_name = last_name
+            user.mobile = mobile            
+            user.save()
 
-        if not user.is_active:
-            raise Exception("This account is inactive.")
-
-        user.first_name = first_name
-        user.last_name = last_name
-        user.mobile = mobile            
-        user.save()
-
-        return UpdateProfileMutation(
-            message="You have updated your profile successfully."
-        )
+            return UpadateProfileResponse(
+                message="You have updated your profile successfully."
+            )
+        except User.DoesNotExist:
+            raise Exception("User not found.")
 
 class Mutation(graphene.ObjectType):
     update_profile = UpdateProfileMutation.Field()
 
 # ============REQUEST=========
 # mutation UpdateProfile(
+#   id: Int!,
 #   $firstName: String!,
 #   $lastName: String!,
 #   $mobile: String!) {    
@@ -49,8 +50,10 @@ class Mutation(graphene.ObjectType):
 #     }
 #   }
 
+
 # =======VARIABLES===========
 # {
+#   "id": 1,
 #   "firstName": "Reynaldo",
 #   "lastName": "Marquez-Gragasin",
 #   "mobile": "+633424234"

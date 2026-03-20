@@ -1,12 +1,23 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-
-// https://vite.dev/config/
 export default defineConfig({
+  base: './',
   build: {
-    chunkSizeWarningLimit: 6000,
-  },
+    chunkSizeWarningLimit: 6000,      
+    outDir: 'dist',
+    // minify: 'esbuild',
+    sourcemap: false, // Set to true if you need to debug production code
+    rollupOptions: {
+      output: {
+      manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        },        
+      },
+    },
+  },  
   plugins: [
     react(),
   ],

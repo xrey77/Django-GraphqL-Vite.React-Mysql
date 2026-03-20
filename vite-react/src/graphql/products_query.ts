@@ -1,8 +1,9 @@
 import { gql } from '@apollo/client';
 
 export const PRODUCTS_QUERY = gql`
-  query GetProducts {
-    products{    
+  query GetProducts{
+    products{
+      reports {
         id
         category
         descriptions
@@ -13,8 +14,9 @@ export const PRODUCTS_QUERY = gql`
         saleprice
         productpicture
         alertstocks
-        criticalstocks
-   }
+        criticalstocks      
+      }
+    }
   }
 `;
 
@@ -33,7 +35,9 @@ export interface ProductsData {
 }
 
 export interface ProductsListData {
-  user: ProductsData;
+  products: {
+    reports: ProductsData[]
+  }
 }
 
 

@@ -1,34 +1,36 @@
 import { gql } from '@apollo/client';
 
 export const CHANGE_PASSWORD = gql`
-  mutation UpdatePassword($input: UpdatePasswordInput!) {
-    UpdatePasswordResponse(input: $input) {
+  mutation UpdatePassword(
+    $id: Int!,
+    $newPassword: String!) {
+    updatePassword(
+      id: $id,
+      newPassword: $newPassword) {
         message
-    }
+      }  
   }
 `;
 
 export interface UserData {
   id: number;
-  firstname: string;
-  lastname: string;
+  firstName: string;
+  lastName: string;
   email: string;
   mobile: string;
   username: string;
-  isactivated: boolean;
-  isblocked: boolean;
+  isActivated: boolean;
+  isBlocked: boolean;
   mailtoken: string;
   userpic: string;
   qrcodeurl: string;
 }
 
 export interface PasswordData {
-  user: UserData;
+  updatePassword: UserData;
 }
 
 export interface PasswordVariables {
-  input: {
     id: number;
-    password: string;
-  }
+    newPassword: string;
 }

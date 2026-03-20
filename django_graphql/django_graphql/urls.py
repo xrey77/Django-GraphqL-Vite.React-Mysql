@@ -12,27 +12,29 @@ from rest_framework.permissions import IsAuthenticated
 from graphene_file_upload.django import FileUploadGraphQLView
 from django.utils.decorators import method_decorator
 
-class DRFGraphQLView(GraphQLView):
-    def parse_body(self, request):
-        data = getattr(request, 'data', None)
-        if isinstance(request, getattr(self, 'request_class', object)):        
-            return request.data            
-        return super().parse_body(request)
-
+class MultipartDRFGraphQLView(FileUploadGraphQLView, GraphQLView):
     def get_context(self, request):
+        # Ensure the context has the user from DRF
         return request
+
+    def parse_body(self, request):
+        # 1. Try standard Graphene-File-Upload logic first
+        if request.content_type and 'multipart/form-data' in request.content_type:
+            return self.parse_multipart(request)
+        # 2. Fallback to DRF data if available
+        if hasattr(request, 'data'):
+            return request.data
+            
+        return super().parse_body(request)
 
     @classmethod
     def as_view(cls, *args, **kwargs):
-        view = super().as_view(*args, **kwargs)        
-        view = csrf_exempt(view)
+        # DRF decorators here
+        view = super().as_view(*args, **kwargs)
         view = api_view(['GET', 'POST'])(view)
         view = authentication_classes([TokenAuthentication])(view)
-        view = permission_classes([AllowAny])(view)        
+        view = permission_classes([AllowAny])(view)
         return view
-
-class MultipartDRFGraphQLView(FileUploadGraphQLView, DRFGraphQLView):
-    pass
 
 class AuthenticatedGraphQLView(GraphQLView):
     @method_decorator(csrf_exempt)

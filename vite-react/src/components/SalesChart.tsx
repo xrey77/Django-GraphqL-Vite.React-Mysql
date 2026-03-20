@@ -138,36 +138,24 @@ export default function SalesChart() {
       }
     };
 
-    const [fetchSales] = useLazyQuery<SalesListData>(SALES_QUERY);
+    const [salesList] = useLazyQuery<SalesListData>(SALES_QUERY);
     const getSales = async () => {
       setMessage("Loading chart data...");
     try {
-        const { data } = await fetchSales();
-          if (data?.sales) {
-              const sales = data.sales;
+        const { data } = await salesList();
+          if (data?.getSales.salesList) {
+              const sales = data.getSales.salesList;
 
               setChartData({
-                  // Explicitly type 'item' as SaleData
                   labels: sales.map((item: SaleData) => 
-                    new Date(item.saledate).toLocaleDateString('en-US', { month: 'short' })
+                    new Date(item.salesdate).toLocaleDateString('en-US', { month: 'short' })
                   ),        
                   datasets: [{
                     label: 'Sales Amount',
-                    // Explicitly type 'item' as SaleData
-                    data: sales.map((item: SaleData) => Number(item.saleamount) || 0),
+                    data: sales.map((item: SaleData) => Number(item.salesamount) || 0),
                     backgroundColor: 'rgba(60, 179, 113, 0.8)',
                   }],
                 });              
-              // setChartData({
-              //     labels: sales.map(item => 
-              //         new Date(item.saledate).toLocaleDateString('en-US', { month: 'short' })
-              //     ),        
-              //     datasets: [{
-              //         label: 'Sales Amount',
-              //         data: sales.map(item => Number(item.saleamount) || 0),
-              //         backgroundColor: 'rgba(60, 179, 113, 0.8)',
-              //     }],
-              // });
           }      
         } catch (err: any) {        
             if (err.AbortError) {

@@ -1,35 +1,33 @@
 import { gql } from '@apollo/client';
 
 export const ACTIVATE_MFA = gql`
-  mutation MfaActivation($input: MfaActivationInput!) {
-    MfaActivationResponse(input: $input) {
-        message
-        qrcodeurl
+  mutation ActivateMfa($id: Int!, $twofactorenabled: Boolean!){
+    activateMfa(id: $id, twofactorenabled: $twofactorenabled) {
+      qrcodeurl
+      message
     }
   }
 `;
 
 export interface UserData {
   id: number;
-  firstname: string;
-  lastname: string;
+  firstName: string;
+  lastName: string;
   email: string;
   mobile: string;
   username: string;
-  isactivated: boolean;
-  isblocked: boolean;
+  isActivated: boolean;
+  isBlocked: boolean;
   mailtoken: string;
   userpic: string;
   qrcodeurl: string;
 }
 
 export interface MfaActivationData {
-  user: UserData;
+  activateMfa: UserData;
 }
 
 export interface MfaActivationVariables {
-  input: {
     id: number;
     twofactorenabled: boolean;
-  }
 }

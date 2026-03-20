@@ -1,35 +1,33 @@
 import { gql } from '@apollo/client';
 
 export const VERIFY_OTP = gql`
-  mutation VerifyOtp($input: OtpInput!) {
-    OtpResponse(input: $input) {
-        message
-        username
+  mutation VerifyTotp($id: Int!, $otp: String!) {
+    verifyTotp(id: $id, otp: $otp) {
+      username
+      message
     }
   }
 `;
 
 export interface UserData {
   id: number;
-  firstname: string;
-  lastname: string;
+  firstName: string;
+  lastName: string;
   email: string;
   mobile: string;
   username: string;
-  isactivated: boolean;
-  isblocked: boolean;
+  isActivated: boolean;
+  isBlocked: boolean;
   mailtoken: string;
   userpic: string;
   qrcodeurl: string;
 }
 
 export interface OtpVerificationData {
-  user: UserData;
+  verifyTotp: UserData;
 }
 
 export interface OtpVerificationVariables {
-  input: {
     id: number;
     otp: string;
-  }
 }

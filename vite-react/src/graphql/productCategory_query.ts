@@ -1,9 +1,10 @@
 import { gql } from '@apollo/client';
 
+
 export const PRODUCT_CATEGORY_QUERY = gql`
   query {
-   categoryList {
-    category
+    productsCategory {
+      name 
       products {
         id
         descriptions
@@ -34,12 +35,12 @@ export interface Product {
 }
 
 export interface Category {
-  category: string;
+  name: string;
   products: Product[];
 }
 
 export interface ProductCategoriesData {
-  categoryList: Category[];
+  productsCategory: Category[];
 }
 
 

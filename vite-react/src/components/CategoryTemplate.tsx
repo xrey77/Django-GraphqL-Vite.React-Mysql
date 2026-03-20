@@ -25,7 +25,6 @@ const styles = StyleSheet.create({
   },
 
 });
-const baseUrl = 'http://127.0.0.1:8000';
 
 export const InventoryReport = ({ data }: { data: ProductCategoriesData }) => (
   <Document>
@@ -33,7 +32,7 @@ export const InventoryReport = ({ data }: { data: ProductCategoriesData }) => (
       <View style={styles.headerContainer}>
         <View>
         <Image 
-          src={`${baseUrl}/static/images/logo.png`}
+          src={'/static/images/logo.png'}
           style={styles.logo} 
         />
 
@@ -51,9 +50,9 @@ export const InventoryReport = ({ data }: { data: ProductCategoriesData }) => (
       </View>
 
       {/* <Text style={styles.header}>Product Inventory Report</Text> */}
-      {data.categoryList.map((cat, i) => (
+      {data.productsCategory.map((cat, i) => (
         <View key={i} style={styles.categorySection}>
-          <Text style={styles.categoryTitle}>{cat.category}</Text>
+          <Text style={styles.categoryTitle}>{cat.name}</Text>
           {/* Table Header */}
           <View style={[styles.tableRow, styles.tableHeader]}>
             <Text style={{width: 250}}>Descriptions</Text>

@@ -1,17 +1,12 @@
 import graphene
-from django.contrib.auth import authenticate
-from rest_framework.authtoken.models import Token
-from graphql import GraphQLError
+from graphql_jwt.decorators import login_required
 from accounts.graphql.types.userType import UserModelType 
-from django.contrib.auth import get_user_model
+from accounts.models import User
 import pyotp
 import qrcode
 import base64
 from io import BytesIO
 from PIL import Image
-
-
-User = get_user_model()
 
 class ActivateMfaResponse(graphene.ObjectType):
     qrcodeurl = graphene.String()
@@ -19,41 +14,42 @@ class ActivateMfaResponse(graphene.ObjectType):
 
 class ActivateMfaMutation(graphene.Mutation):
     class Arguments:
+        id =  graphene.Int(required=True)
         twofactorenabled = graphene.Boolean(required=True)        
 
     qrcodeurl=graphene.String()
     message = graphene.String()
 
-    def mutate(self, info, twofactorenabled):
-        user = info.context.user
-
-        if not user.is_authenticated:
-            raise Exception("Authentication required")
-
-        if not user.is_active:
-            raise Exception("This account is inactive.")
-
+    @login_required
+    def mutate(self, info, id, twofactorenabled):
+        user = User.objects.get(pk=id)
+   
         if twofactorenabled:
+            try:
+                secret_key = pyotp.random_base32()    
+                totp = pyotp.TOTP(secret_key)        
+                qrcodeuri = totp.provisioning_uri(name=user.email, issuer_name='DIEBOLD-NIXDORF')
+                qrcode_base64 = generate_qr_code_base64(qrcodeuri)                
 
-            secret_key = pyotp.random_base32()    
-            totp = pyotp.TOTP(secret_key)        
-            qrcodeuri = totp.provisioning_uri(name=user.email, issuer_name='SUPERCARS INC.')
-            qrcode_base64 = generate_qr_code_base64(qrcodeuri)                
-
-            user.secretkey=secret_key
-            user.qrcodeurl=qrcode_base64
-            user.save()
-            return ActivateMfaResponse(
-                qrcodeurl=qrcode_base64,
-                message="Multi-Factor Authenticator has been enabled successfully.")
+                user.secretkey=secret_key
+                user.qrcodeurl=qrcode_base64
+                user.save()
+                return ActivateMfaResponse(
+                    qrcodeurl=qrcode_base64,
+                    message="Multi-Factor Authenticator has been enabled successfully.")
+            except User.DoesNotExist:
+                raise Exception("User not found.")
 
         else:
-            user.secretkey = None
-            user.qrcodeurl=None
-            user.save()
-            return ActivateMfaResponse(
-                qrcodeurl=None,
-                message="Multi-Factor Authenticator has been disabled successfully.")
+            try:
+                user.secretkey = None
+                user.qrcodeurl=None
+                user.save()
+                return ActivateMfaResponse(
+                    qrcodeurl=None,
+                    message="Multi-Factor Authenticator has been disabled successfully.")
+            except User.DoesNotExist:
+                raise Exception("User not found.")
 
 def generate_qr_code_base64(data):
     qr_img = qrcode.make(data)
@@ -72,8 +68,8 @@ class Mutation(graphene.ObjectType):
     activate_mfa = ActivateMfaMutation.Field()
 
 # ============REQUEST=========
-# mutation ActivateMfa($twofactorenabled: Boolean!){
-#   activateMfa(twofactorenabled: $twofactorenabled) {
+# mutation ActivateMfa($id: Int!, $twofactorenabled: Boolean!){
+#   activateMfa(id: $id, twofactorenabled: $twofactorenabled) {
 #     qrcodeurl
 #     message
 #   }
@@ -81,5 +77,6 @@ class Mutation(graphene.ObjectType):
 
 # =======VARIABLES===========
 # {
+#   "id": 1,
 #   "twofactorenabled": false
 # }

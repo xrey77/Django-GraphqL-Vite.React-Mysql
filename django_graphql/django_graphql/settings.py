@@ -6,7 +6,17 @@ from django.utils.translation import gettext
 django.utils.translation.ugettext = gettext
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+# SECRET_KEY = 'cgg*7odr8gsmohv6k!0fdg4irbrh%sog^+#2e0+r52gv+ds12*'
 SECRET_KEY = 'django-insecure-mdz*g+kgnt57re&a)l2!5=^zw34d*!4&8r709vas_^k6cpl_cz'
+
+
+#---for production-----
+# SECURE_HSTS_SECONDS = 3600 
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True 
+# SECURE_HSTS_PRELOAD = True 
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
 
 DEBUG = True
 APPEND_SLASH = False
@@ -70,11 +80,13 @@ GRAPHENE = {
 GRAPHQL_JWT = {
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_AUTH_HEADER_PREFIX': 'Bearer', # Default is 'JWT' or 'Bearer'
+    'JWT_EXPIRATION_DELTA': timedelta(minutes=480),    
+    'JWT_VERIFY_EXPIRATION': True
 }
 
 AUTHENTICATION_BACKENDS = [
     "graphql_jwt.backends.JSONWebTokenBackend",
-    "django.contrib.auth.backends.ModelBackend",
+    "django.contrib.auth.backends.ModelBackend"
 ]
 
 
@@ -98,12 +110,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'django_graphql.wsgi.application'
 
-# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",
+#     "http://127.0.0.1:5173",
+# ]
 
 
 # Database

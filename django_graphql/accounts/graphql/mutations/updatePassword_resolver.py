@@ -1,43 +1,37 @@
 import graphene
-from django.contrib.auth import authenticate
-from rest_framework.authtoken.models import Token
-from graphql import GraphQLError
+from graphql_jwt.decorators import login_required
 from accounts.graphql.types.userType import UserModelType 
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from accounts.models import User
 
 class UpadatePasswordResponse(graphene.ObjectType):
     message = graphene.String()
 
 class UpdatePasswordMutation(graphene.Mutation):
     class Arguments:
+        id = graphene.Int(required=True)
         new_password = graphene.String(required=True)        
 
-    user = graphene.Field(UserModelType)
     message = graphene.String()
 
-    def mutate(self, info, new_password):
-        user = info.context.user
+    @login_required
+    def mutate(self, info, id, new_password):
+        try:
+            user = User.objects.get(pk=id)
 
-        if not user.is_authenticated:
-            raise Exception("Authentication required")
+            user.set_password(new_password)
+            user.save()
 
-        if not user.is_active:
-            raise Exception("This account is inactive.")
-
-        user.set_password(new_password)
-        user.save()
-
-        return UpdatePasswordMutation(
-            message="You changed your password successfully.")
+            return UpdatePasswordMutation(
+                message="You changed your password successfully.")
+        except User.DoesNotExist:
+            raise Exception("User not found.")
 
 class Mutation(graphene.ObjectType):
     update_password = UpdatePasswordMutation.Field()
 
 # ============REQUEST=========
 # mutation UpdatePassword(
+#   $id: Int!,
 #   $newPassword: String!) {
 #   updatePassword(
 #     newPassword: $newPassword) {
@@ -47,5 +41,6 @@ class Mutation(graphene.ObjectType):
 
 # =======VARIABLES===========
 # {
+#   "id": 1,
 #   "newPassword": "1",
 # }

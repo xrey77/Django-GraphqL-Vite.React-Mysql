@@ -2,7 +2,7 @@ import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/render
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontSize: 12, paddingBottom: 60 },
-  logo: { width: 140, height: 30, marginBottom: 10 },
+  logos: { width: 140, height: 30, marginBottom: 10 },
   headerContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   headerTitle: { fontSize: 18, fontWeight: 'bold' },
   row: { flexDirection: 'row', borderBottom: '1px solid #EEE', padding: 5 },
@@ -18,7 +18,6 @@ const styles = StyleSheet.create({
   },
 });
 
-const baseUrl = 'http://127.0.0.1:8000';
 
 export const ReportTemplate = ({ products }: { products: any[] }) => (
   <Document>
@@ -26,8 +25,8 @@ export const ReportTemplate = ({ products }: { products: any[] }) => (
       <View style={styles.headerContainer}>
         <View>
         <Image 
-          src={`${baseUrl}/static/images/logo.png`}
-          style={styles.logo} 
+          src={'http://127.0.0.1:8000/static/images/logo.png'}
+          style={styles.logos} 
         />
 
           <Text style={styles.headerTitle}>Product Report</Text>
@@ -44,7 +43,6 @@ export const ReportTemplate = ({ products }: { products: any[] }) => (
         <Text style={{ fontWeight: 'bold', width: 100 }}>Price</Text>
       </View>
 
-      {/* Table Body */}
       {products.map((p) => (
         <View key={p.id} style={styles.row} wrap={false}>
           <Text style={{ width: 30}}>{p.id}</Text>
